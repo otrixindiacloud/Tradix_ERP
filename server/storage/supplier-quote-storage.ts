@@ -2,7 +2,11 @@
 import { db } from "../db";
 import { eq, and, gte, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+<<<<<<< HEAD
 import { quotations, quotationItems, customers, salesOrders, customerAcceptances, purchaseOrders, suppliers } from "@shared/schema";
+=======
+import { quotations, quotationItems, customers, salesOrders, customerAcceptances, purchaseOrders } from "@shared/schema";
+>>>>>>> origin/main
 
 export class SupplierQuoteStorage {
   static async list(params: any) {
@@ -37,6 +41,7 @@ export class SupplierQuoteStorage {
       // whereClauses.push(ilike(quotations.supplierName, `%${params.search}%`));
     }
     // Create aliases for different customer roles
+<<<<<<< HEAD
     const actualCustomers = alias(customers, "customers");
     
     // Join quotations with customers to get customer information
@@ -48,6 +53,22 @@ export class SupplierQuoteStorage {
       })
       .from(quotations)
       .leftJoin(actualCustomers, eq(quotations.customerId, actualCustomers.id));
+=======
+    const suppliers = alias(customers, "suppliers");
+    const actualCustomers = alias(customers, "customers");
+    
+    // Join quotations with customers to get supplier names and customer information
+    const query = db
+      .select({
+        quotation: quotations,
+        supplier: suppliers,
+        customer: actualCustomers,
+      })
+      .from(quotations)
+      .leftJoin(suppliers, eq(quotations.customerId, suppliers.id))
+      .leftJoin(salesOrders, eq(quotations.id, salesOrders.quotationId))
+      .leftJoin(actualCustomers, eq(salesOrders.customerId, actualCustomers.id));
+>>>>>>> origin/main
 
     let results;
     if (whereClauses.length > 0) {
@@ -56,11 +77,25 @@ export class SupplierQuoteStorage {
       results = await query;
     }
 
+<<<<<<< HEAD
     // Fetch all suppliers to match with quotations
     const allSuppliers = await db.select().from(suppliers);
     
     // Process results to include customer and supplier information
     const processedResults = results.map(row => {
+=======
+    // Process results to include customer information
+    const processedResults = results.map(row => {
+      const supplier = row.supplier ? {
+        id: row.supplier.id,
+        name: row.supplier.name || row.supplier.customerName || row.supplier.companyName || row.supplier.fullName,
+        email: row.supplier.email,
+        phone: row.supplier.phone,
+        address: row.supplier.address || row.supplier.billingAddress,
+        customerType: row.supplier.customerType,
+      } : null;
+
+>>>>>>> origin/main
       const customer = row.customer ? {
         id: row.customer.id,
         name: row.customer.name || row.customer.customerName || row.customer.companyName || row.customer.fullName,
@@ -70,6 +105,7 @@ export class SupplierQuoteStorage {
         customerType: row.customer.customerType,
       } : null;
 
+<<<<<<< HEAD
       // Try to find supplier information
       let supplier = null;
       let supplierName = "Unknown Supplier";
@@ -115,6 +151,12 @@ export class SupplierQuoteStorage {
         ...row.quotation,
         supplier,
         supplierName: supplierName,
+=======
+      return {
+        ...row.quotation,
+        supplier,
+        supplierName: supplier?.name || "Unknown Supplier",
+>>>>>>> origin/main
         customer,
         __customerEmbedded: true
       };

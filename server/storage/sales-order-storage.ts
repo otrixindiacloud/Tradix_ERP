@@ -1,5 +1,9 @@
 import { db } from "../db";
+<<<<<<< HEAD
 import { salesOrders, salesOrderItems, quotations, quotationItems, items, customers, purchaseOrders } from "@shared/schema";
+=======
+import { salesOrders, salesOrderItems, quotations, quotationItems, items, customers } from "@shared/schema";
+>>>>>>> origin/main
 import { eq, and, desc, sql, or, like } from "drizzle-orm";
 import { validateUUID, SYSTEM_USER_ID } from "@shared/utils/uuid";
 import { ISalesOrderStorage } from "./interfaces";
@@ -137,6 +141,7 @@ export class SalesOrderStorage extends BaseStorage implements ISalesOrderStorage
       throw new Error('Quotation must be accepted before creating sales order');
     }
 
+<<<<<<< HEAD
     // Validate that PO has been uploaded by checking the purchaseOrders table
     const purchaseOrder = await db
       .select()
@@ -145,6 +150,10 @@ export class SalesOrderStorage extends BaseStorage implements ISalesOrderStorage
       .limit(1);
     
     if (!purchaseOrder[0]) {
+=======
+    // Validate that PO has been uploaded
+    if (!quotationData.customerPoDocument || quotationData.customerPoDocument.trim() === '') {
+>>>>>>> origin/main
       throw new Error('Purchase order document must be uploaded before creating sales order');
     }
     const quotationItemsData = await db

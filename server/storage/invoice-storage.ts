@@ -93,6 +93,7 @@ export class InvoiceStorage extends BaseStorage {
       console.log(`[DEBUG] Found sales order: ${so.orderNumber}`);
       items = await db.select().from(deliveryItems).where(eq(deliveryItems.deliveryId, deliveryId));
       console.log(`[DEBUG] Found ${items.length} delivery items`);
+<<<<<<< HEAD
       console.log(`[DEBUG] Delivery items data:`, items.map(item => ({
         id: item.id,
         itemId: item.itemId,
@@ -101,6 +102,8 @@ export class InvoiceStorage extends BaseStorage {
         barcode: item.barcode,
         supplierCode: item.supplierCode
       })));
+=======
+>>>>>>> origin/main
     } catch (error) {
       console.error(`[DEBUG] Error in initial data fetching:`, error);
       throw error;
@@ -140,6 +143,7 @@ export class InvoiceStorage extends BaseStorage {
     let lineNumber = 1;
     for (const di of itemsToProcess as any[]) {
       console.log(`[DEBUG] Processing delivery item: ${di.id}`);
+<<<<<<< HEAD
       let soItemArr = [];
       const isValidSalesOrderItemId = di.salesOrderItemId && 
         di.salesOrderItemId !== null && 
@@ -157,6 +161,9 @@ export class InvoiceStorage extends BaseStorage {
           soItemArr = [];
         }
       }
+=======
+      const soItemArr = di.salesOrderItemId ? await db.select().from(salesOrderItems).where(eq(salesOrderItems.id, di.salesOrderItemId)).limit(1) : [];
+>>>>>>> origin/main
       const soItem: any = soItemArr[0];
       console.log(`[DEBUG] Sales order item: ${soItem?.id || 'None'}`);
       console.log(`[DEBUG] Sales order item data:`, soItem ? {
@@ -177,6 +184,7 @@ export class InvoiceStorage extends BaseStorage {
       const itemId = soItem?.itemId || di.itemId || null;
       console.log(`[DEBUG] Item ID: ${itemId}, Barcode: ${barcode}, Supplier Code: ${supplierCode}`);
       
+<<<<<<< HEAD
       // Check if the item exists in the items table - validate itemId more strictly
       const isValidItemId = itemId && 
         itemId !== null && 
@@ -213,6 +221,30 @@ export class InvoiceStorage extends BaseStorage {
       }
       
       if (!isValidItemId) {
+=======
+      // Check if the item exists in the items table
+      if (itemId) {
+        const itemArr = await db.select().from(items).where(eq(items.id, itemId)).limit(1);
+        const item = itemArr[0];
+        console.log(`[DEBUG] Item master data:`, item ? {
+          id: item.id,
+          supplierCode: item.supplierCode,
+          barcode: item.barcode,
+          description: item.description
+        } : 'Item not found in master data');
+        
+        // If item exists, use its data for better accuracy
+        if (item) {
+          const finalBarcode = di.barcode || item.barcode || `AUTO-${lineNumber}`;
+          const finalSupplierCode = di.supplierCode || item.supplierCode || 'AUTO-SUP';
+          const finalDescription = di.description || item.description || 'Item';
+          
+          console.log(`[DEBUG] Using item master data - Barcode: ${finalBarcode}, Supplier Code: ${finalSupplierCode}, Description: ${finalDescription}`);
+        }
+      }
+      
+      if (!itemId) {
+>>>>>>> origin/main
         console.log(`[DEBUG] WARNING: No itemId found for delivery item ${di.id}, attempting to create minimal item...`);
         
         // Try to create a minimal item as a last resort
